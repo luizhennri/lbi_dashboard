@@ -7,8 +7,8 @@ import plotly.express as px
 from unidecode import unidecode
 
 # Importação dos dados
-df_lbi = pd.read_csv('C:/projects/pub/LBI/admin_HD_LBI.csv')
-df_dados_mapa = pd.read_csv('C:/projects/pub/LBI/dados_mapa.csv')
+df_lbi = pd.read_csv('./admin_HD_LBI.csv')
+df_dados_mapa = pd.read_csv('./dados_mapa.csv')
 
 # DataSets Auxiliares
 recorte_temporal = ['2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021']
@@ -45,7 +45,12 @@ ESTADOS = [
 
 with urlopen("https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/brazil-states.geojson") as response: Brazil = json.load(response)
 
-state_id_map = {}                   
+state_id_map = {}      
+
+
+external_stylesheets = [
+    'https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap',
+]
 
 for feature in Brazil['features']: 
     feature['id'] = unidecode(feature['properties']['name'])
@@ -54,7 +59,10 @@ for feature in Brazil['features']:
 BRAZIL_GEOJSON = Brazil.copy()
 
 # Inicialização do Aplicativo
-app = Dash(__name__, assets_external_path = 'C:/projects/pub/LBI/Site_HabeasData/assets', title = 'LBI Dashboard', update_title='Atualizando ...', suppress_callback_exceptions=True)
+app = Dash(__name__, external_stylesheets=external_stylesheets, assets_external_path = './assets', title = 'LBI Dashboard', update_title='Atualizando ...', suppress_callback_exceptions=True)
+
+app.css.config.serve_locally = True
+
 
 # Métricas
 df_lbi_filter = df_lbi[df_lbi['numero'].str.split('.').str[1].isin([str(ano) for ano in range(2011, 2022)])]
@@ -75,7 +83,7 @@ fig = px.choropleth_mapbox(
     color = 'count', 
     hover_name = 'Estado',
     hover_data = ['count','Longitude','Latitude'],
-    title = "Processos por Estado",
+    title = "Quantidade de Processos por Estado",
     mapbox_style= 'white-bg',
     center = {"lat":-14, "lon": -55},
     zoom = 2,
@@ -109,299 +117,364 @@ def render_content(tab):
     if tab == 'tab-visao_geral':
         return html.Div([
 
-            html.Label("Filtrar por Estado"),
-            dcc.Dropdown(
-                ESTADOS,
-                multi = True,
-                clearable = True,
-                id = "filter-state"
-            ),
 
-            html.Label("Filtrar por Região"),
-            dcc.Dropdown(
-                REGIOES,
-                multi = True,
-                clearable = True,
-                id = "filter-region"
-            ),
-            
             html.Div([
-                html.H6(children='Total de Processos',
+
+                #FILTROS
+                html.Div([
+                            html.Div([
+                                html.Label("FILTRAR POR ESTADO"),
+                                dcc.Dropdown(
+                                    ESTADOS,
+                                    multi = True,
+                                    clearable = True,
+                                    id = "filter-state"
+                                ),], style={'display': 'flex', 'flex-direction': 'column', 'width': '100%', 'margin-right': '20px',}),
+
+                            html.Div([
+                                html.Label("FILTRAR POR REGIÃO"),
+                                dcc.Dropdown(
+                                    REGIOES,
+                                    multi = True,
+                                    clearable = True,
+                                    id = "filter-region"
+                                ),], style={'display': 'flex', 'flex-direction': 'column', 'width': '100%'}),
+
+                ], style={ 'display': 'flex',
+                          'flex-direction': 'row',
+                          
+                }),
+                #TOTAL
+                html.Div([
+
+                        html.H2(children='Total de Processos',
                         style={
                             'textAlign': 'center',
                             'color': '#252423',
-                            'font-weight':'bold'}
-                        ),
+                            'font-weight':'bold',
+                            'font-size': '24px'},
+                        id = 'total_cases'
+                        ),      
 
-                html.Div(None,
-                    style={
-                        'textAlign': 'center',
-                        'color': '#252423',
-                        'fontSize': 30},
-                    id = 'total_cases'
-                    ),
+                
+                ], style={
+                }),
 
+                #MAPA
+                html.Div([
+                            
                 html.Div(
                     dcc.Graph(figure = fig)
                 )
-            ], style={
-                      'widtg': '5px',
-                      'height': '5px'}, className="row flex-display"),
-            
-            html.Div([
-                html.Div([
-                    html.Div([
-                        html.H6(children='Área do Direito Mais presente',
-                                style={
-                                    'textAlign': 'center',
-                                    'color': '#252423',
-                                    'margin-bottom': '3px',
-                                    'font-weight':'bold'}
-                                ),
-
-                        html.P(f"{df_lbi_filter['area_direito'].value_counts().index.tolist()[0]}",
-                            style={
-                                'textAlign': 'center',
-                                'color': '#118DFF',
-                                'fontSize': 15,
-                                'font-weight':'bold'}
-                            ),
-
-                        html.P(None,
-                            style={
-                                'textAlign': 'center',
-                                'color': '#252423',
-                                'fontSize': 30,
-                                'margin-top': '-10px'},
-                                id = 'total_area_direito'
-                            ),
-
-                        html.P('dos processos',
-                            style={
-                                'textAlign': 'center',
-                                'color': '#252423',
-                                'fontSize': 15,
-                                'margin-top': '-18px',
-                                'margin-left': '48px',
-                                'font-weight':'bold'}
-                            )], className="row flex-display"
-                )], style={'float':'center',
-                    'border-radius': '25px',
-                    'border-style': 'outset'}),
-
-                html.Div([
-                    html.Div([
-                        html.H6(children='Maior Matéria Principal',
-                                style={
-                                    'textAlign': 'center',
-                                    'color': '#252423',
-                                    'margin-bottom': '3px',
-                                    'font-weight':'bold'}
-                                ),
-
-                        html.P(f"{df_lbi_filter['materia_principal'].value_counts().index.tolist()[0]}",
-                            style={
-                                'textAlign': 'center',
-                                'color': '#118DFF',
-                                'fontSize': 15,
-                                'font-weight':'bold'}
-                            ),
-
-                        html.P(None,
-                            style={
-                                'textAlign': 'center',
-                                'color': '#252423',
-                                'fontSize': 30,
-                                'margin-top': '-10px'},
-                                id = 'total_materia_principal'
-                            ),
-
-                        html.P('dos processos',
-                            style={
-                                'textAlign': 'center',
-                                'color': '#252423',
-                                'fontSize': 15,
-                                'margin-top': '-18px',
-                                'margin-left': '48px',
-                                'font-weight':'bold'}
-                            )], className="row flex-display"
-                )], style={'float':'right',
-                    'border-radius': '25px',
-                    'border-style': 'outset'})
-            ], style={'float':'right',
-                    'vertical-align': 'top',
-                    'margin-left': '20px'}),
-            
-            html.Div([
-                html.Div([
-                    html.Div([
-                        html.H6(children='Natureza do processo Mais presente',
-                                style={
-                                    'textAlign': 'center',
-                                    'color': '#252423',
-                                    'margin-bottom': '3px',
-                                    'font-weight':'bold'}
-                                ),
-
-                        html.P(f"{df_lbi_filter['natureza_processo'].value_counts().index.tolist()[0]}",
-                            style={
-                                'textAlign': 'center',
-                                'color': '#118DFF',
-                                'fontSize': 15,
-                                'font-weight':'bold'}
-                            ),
-
-                        html.P(None,
-                            style={
-                                'textAlign': 'center',
-                                'color': '#252423',
-                                'fontSize': 30,
-                                'margin-top': '-10px'},
-                                id = 'total_natureza_processo'
-                            ),
-
-                        html.P('dos processos',
-                            style={
-                                'textAlign': 'center',
-                                'color': '#252423',
-                                'fontSize': 15,
-                                'margin-top': '-18px',
-                                'margin-left': '48px',
-                                'font-weight':'bold'}
-                            )], className="row flex-display"
-                )], style={'float':'center',
-                    'border-radius': '25px',
-                    'border-style': 'outset'}),
-
-                html.Div([
-                    html.Div([
-                        html.H6(children='Natureza da Vara mais Presente',
-                                style={
-                                    'textAlign': 'center',
-                                    'color': '#252423',
-                                    'margin-bottom': '3px',
-                                    'font-weight':'bold'}
-                                ),
-
-                        html.P(f"{df_lbi_filter['natureza_vara'].value_counts().index.tolist()[0]}",
-                            style={
-                                'textAlign': 'center',
-                                'color': '#118DFF',
-                                'fontSize': 15,
-                                'font-weight':'bold'}
-                            ),
-
-                        html.P(None,
-                            style={
-                                'textAlign': 'center',
-                                'color': '#252423',
-                                'fontSize': 30,
-                                'margin-top': '-10px'},
-                                id = 'total_natureza_vara'
-                            ),
-
-                        html.P('dos processos',
-                            style={
-                                'textAlign': 'center',
-                                'color': '#252423',
-                                'fontSize': 15,
-                                'margin-top': '-18px',
-                                'margin-left': '48px',
-                                'font-weight':'bold'}
-                            )], className="row flex-display"
-                )], style={'float':'right',
-                    'border-radius': '25px',
-                    'border-style': 'outset'})
-            ], style={'float':'right',
-                    'vertical-align': 'middle',
-                    'margin-left':'20px'}),
-
-            html.Div([
-                html.Div([
-                    html.Div([
-                        html.H6(children='Procedimento Mais Presente',
-                                style={
-                                    'textAlign': 'center',
-                                    'color': '#252423',
-                                    'margin-bottom': '3px',
-                                    'font-weight':'bold'}
-                                ),
-
-                        html.P(f"{df_lbi_filter['procedimento'].value_counts().index.tolist()[0]}",
-                            style={
-                                'textAlign': 'center',
-                                'color': '#118DFF',
-                                'fontSize': 15,
-                                'font-weight':'bold'}
-                            ),
-
-                        html.P(None,
-                            style={
-                                'textAlign': 'center',
-                                'color': '#252423',
-                                'fontSize': 30,
-                                'margin-top': '-10px'},
-                                id = 'total_procedimento'
-                            ),
-
-                        html.P('dos processos',
-                            style={
-                                'textAlign': 'center',
-                                'color': '#252423',
-                                'fontSize': 15,
-                                'margin-top': '-18px',
-                                'margin-left': '48px',
-                                'font-weight':'bold'}
-                            )], className="row flex-display"
-                )], style={'float':'center',
-                    'border-radius': '25px',
-                    'border-style': 'outset'}),
-
-                html.Div([
-                    html.Div([
-                        html.H6(children='Tipo de Processo Mais Presente',
-                                style={
-                                    'textAlign': 'center',
-                                    'color': '#252423',
-                                    'margin-bottom': '3px',
-                                    'font-weight':'bold'}
-                                ),
-
-                        html.P(f"{df_lbi_filter['tipo_processo'].value_counts().index.tolist()[0]}",
-                            style={
-                                'textAlign': 'center',
-                                'color': '#118DFF',
-                                'fontSize': 15,
-                                'font-weight':'bold'}
-                            ),
-
-                        html.P(None,
-                            style={
-                                'textAlign': 'center',
-                                'color': '#252423',
-                                'fontSize': 30,
-                                'margin-top': '-10px'},
-                                id = 'total_tipo_processo'
-                            ),
-
-                        html.P('dos processos',
-                            style={
-                                'textAlign': 'center',
-                                'color': '#252423',
-                                'fontSize': 15,
-                                'margin-top': '-18px',
-                                'margin-left': '48px',
-                                'font-weight':'bold'}
-                            )], className="row flex-display"
-                )], style={'float':'right',
-                    'border-radius': '25px',
-                    'border-style': 'outset'})
-            ], style={'float':'right',
-                    'vertical-align':'bottom',
-                    'margin-left':'20px'})
+                
+                ], style={
+                }),
+                            
 
         
-        ])
+        ], style={
+                                'background-color': '#fff',
+                                'border-radius': '15px',
+                                'box-shadow': '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)',
+                                'padding': '10px',
+        }),
+
+                html.Div([
+                            # Direito civil
+                            html.Div([
+                                html.H6(children='Área do Direito Mais presente',
+                                    style={
+                                        'textAlign': 'center',
+                                        'color': '#252423',
+                                        'margin-bottom': '3px',
+                                        'font-weight': '400',
+                                        'font-size': '14px',
+                                        }
+                                    ),
+                            html.P(f"{df_lbi_filter['area_direito'].value_counts().index.tolist()[0]}",
+                            style={
+                                'textAlign': 'center',
+                                'color': '#118DFF',
+                                'fontSize': 15,
+                                'font-weight':'bold',
+                                'margin-top': '5px',
+                                'margin-bottom': '15px',
+                                }
+                            ),
+                            html.P(None,
+                            style={
+                                'textAlign': 'center',
+                                'color': '#252423',
+                                'fontSize': 40,
+                                'margin': '0px',
+                                },
+                                id = 'total_area_direito'
+                            ),
+                            html.P('dos processos',
+                            style={
+                                'textAlign': 'center',
+                                'color': '#252423',
+                                'fontSize': 12,
+                                'margin-top': '5px',
+                                'margin-left': '48px',
+                                'font-weight':'bold'}
+                            )
+                            ], style={
+                                'background-color': '#fff',
+                                'border-radius': '15px',
+                                'box-shadow': '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)',
+                            }),
+
+
+                            # Familia
+                            html.Div([
+                                html.H6(children='Maior Matéria Principal',
+                                    style={
+                                        'textAlign': 'center',
+                                        'color': '#252423',
+                                        'margin-bottom': '3px',
+                                        'font-weight': '400',
+                                        'font-size': '14px',
+                                        }
+                                    ),
+                            html.P(f"{df_lbi_filter['materia_principal'].value_counts().index.tolist()[0]}",
+                            style={
+                                'textAlign': 'center',
+                                'color': '#118DFF',
+                                'fontSize': 15,
+                                'font-weight':'bold',
+                                'margin-top': '5px',
+                                'margin-bottom': '15px',
+                                }
+                            ),
+                            html.P(None,
+                            style={
+                                'textAlign': 'center',
+                                'color': '#252423',
+                                'fontSize': 40,
+                                'margin': '0px',
+                                },
+                                id = 'total_materia_principal'
+                            ),
+                            html.P('dos processos',
+                            style={
+                                'textAlign': 'center',
+                                'color': '#252423',
+                                'fontSize': 12,
+                                'margin-top': '5px',
+                                'margin-left': '48px',
+                                'font-weight':'bold'}
+                            )
+                            ], style={
+                                'background-color': '#fff',
+                                'border-radius': '15px',
+                                'box-shadow': '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)',
+                            }),
+
+
+                            # Processo civil e do trabalho
+                            html.Div([
+                                html.H6(children='Natureza do processo Mais presente',
+                                    style={
+                                        'textAlign': 'center',
+                                        'color': '#252423',
+                                        'margin-bottom': '3px',
+                                        'font-weight': '400',
+                                        'font-size': '14px',
+                                        }
+                                    ),
+                            html.P(f"{df_lbi_filter['natureza_processo'].value_counts().index.tolist()[0]}",
+                            style={
+                                'textAlign': 'center',
+                                'color': '#118DFF',
+                                'fontSize': 15,
+                                'font-weight':'bold',
+                                'margin-top': '5px',
+                                'margin-bottom': '15px',
+                                }
+                            ),
+                            html.P(None,
+                            style={
+                                'textAlign': 'center',
+                                'color': '#252423',
+                                'fontSize': 40,
+                                'margin': '0px',
+                                },
+                                id = 'total_natureza_processo'
+                            ),
+                            html.P('dos processos',
+                            style={
+                                'textAlign': 'center',
+                                'color': '#252423',
+                                'fontSize': 12,
+                                'margin-top': '5px',
+                                'margin-left': '48px',
+                                'font-weight':'bold'}
+                            )
+                            ], style={
+                                'background-color': '#fff',
+                                'border-radius': '15px',
+                                'box-shadow': '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)',
+                            }),
+
+                            # Cível
+                            html.Div([
+                                html.H6(children='Natureza da Vara mais Presente',
+                                    style={
+                                        'textAlign': 'center',
+                                        'color': '#252423',
+                                        'margin-bottom': '3px',
+                                        'font-weight': '400',
+                                        'font-size': '14px',
+                                        }
+                                    ),
+                            html.P(f"{df_lbi_filter['natureza_vara'].value_counts().index.tolist()[0]}",
+                            style={
+                                'textAlign': 'center',
+                                'color': '#118DFF',
+                                'fontSize': 15,
+                                'font-weight':'bold',
+                                'margin-top': '5px',
+                                'margin-bottom': '15px',
+                                }
+                            ),
+                            html.P(None,
+                            style={
+                                'textAlign': 'center',
+                                'color': '#252423',
+                                'fontSize': 40,
+                                'margin': '0px',
+                                },
+                                id = 'total_natureza_vara'
+                            ),
+                            html.P('dos processos',
+                            style={
+                                'textAlign': 'center',
+                                'color': '#252423',
+                                'fontSize': 12,
+                                'margin-top': '5px',
+                                'margin-left': '48px',
+                                'font-weight':'bold'}
+                            )
+                            ], style={
+                                'background-color': '#fff',
+                                'border-radius': '15px',
+                                'box-shadow': '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)',
+                            }),
+
+                            # Procedimento de conhecimento
+                            html.Div([
+                                html.H6(children='Procedimento Mais Presente',
+                                    style={
+                                        'textAlign': 'center',
+                                        'color': '#252423',
+                                        'margin-bottom': '3px',
+                                        'font-weight': '400',
+                                        'font-size': '14px',
+                                        }
+                                    ),
+                            html.P(f"{df_lbi_filter['procedimento'].value_counts().index.tolist()[0]}",
+                            style={
+                                'textAlign': 'center',
+                                'color': '#118DFF',
+                                'fontSize': 15,
+                                'font-weight':'bold',
+                                'margin-top': '5px',
+                                'margin-bottom': '15px',
+                                }
+                            ),
+                            html.P(None,
+                            style={
+                                'textAlign': 'center',
+                                'color': '#252423',
+                                'fontSize': 40,
+                                'margin': '0px',
+                                },
+                                id = 'total_procedimento'
+                            ),
+                            html.P('dos processos',
+                            style={
+                                'textAlign': 'center',
+                                'color': '#252423',
+                                'fontSize': 12,
+                                'margin-top': '5px',
+                                'margin-left': '48px',
+                                'font-weight':'bold'}
+                            )
+                            ], style={
+                                'background-color': '#fff',
+                                'border-radius': '15px',
+                                'box-shadow': '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)',
+                            }),
+
+
+                            # Processo de conhecimento
+                            html.Div([
+                                html.H6(children='Tipo de Processo Mais Presente',
+                                    style={
+                                        'textAlign': 'center',
+                                        'color': '#252423',
+                                        'margin-bottom': '3px',
+                                        'font-weight': '400',
+                                        'font-size': '14px',
+                                        }
+                                    ),
+                            html.P(f"{df_lbi_filter['tipo_processo'].value_counts().index.tolist()[0]}",
+                            style={
+                                'textAlign': 'center',
+                                'color': '#118DFF',
+                                'fontSize': 15,
+                                'font-weight':'bold',
+                                'margin-top': '5px',
+                                'margin-bottom': '15px',
+                                }
+                            ),
+                            html.P(None,
+                            style={
+                                'textAlign': 'center',
+                                'color': '#252423',
+                                'fontSize': 40,
+                                'margin': '0px',
+                                },
+                                id = 'total_tipo_processo'
+                            ),
+                            html.P('dos processos',
+                            style={
+                                'textAlign': 'center',
+                                'color': '#252423',
+                                'fontSize': 12,
+                                'margin-top': '5px',
+                                'margin-left': '48px',
+                                'font-weight':'bold'}
+                            )
+                            ], style={
+                                'background-color': '#fff',
+                                'border-radius': '15px',
+                                'box-shadow': '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)',
+                            }),
+
+
+
+            
+                    
+
+        
+        ], style={
+            'display': 'grid',
+            'grid-template-columns': '1fr 1fr',
+            'grid-template-rows': '1fr 1fr 1fr',
+            'gap': '10px',
+        }),
+                    
+
+        
+        ], style={
+            'display': 'grid',
+            'grid-template-columns': '1fr 1fr',
+            'gap': '10px',
+            'padding': '10px',
+            'font-family': 'Roboto, Open Sans, verdana, arial, sans-serif',
+        })
 
     elif tab == 'tab-duracao':
         return html.Div(
