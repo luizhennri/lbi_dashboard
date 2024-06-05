@@ -92,14 +92,6 @@ ESTADOS = [
     "Tocantins"
 ]
 
-CORES_POR_REGIAO = {
-    'Norte': 'blue',
-    'Nordeste': 'red',
-    'Centro-Oeste': 'orange',
-    'Sudeste': 'green',
-    'Sul': 'purple'
-}
-
 with urlopen("https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/brazil-states.geojson") as response: Brazil = json.load(response)
 
 state_id_map = {}      
@@ -125,14 +117,14 @@ df_lbi_filter = df_lbi[df_lbi['numero'].str.split('.').str[1].isin([str(ano) for
 
 # Estilo da Aplicação
 app.layout = html.Div([
-        html.Div(id='tabs-content'),
         html.Div(
             dcc.Tabs(id="tabs-LBI", value='tab-visao_geral', children=[
                 dcc.Tab(label='Visão Geral', value='tab-visao_geral'),
                 dcc.Tab(label='Duração', value='tab-duracao'),
                 dcc.Tab(label='Demandas', value='tab-demandas')
         ]), style={'font-weight':'bold',
-                   'font-family':'Raleway, sans-serif'})
+                   'font-family':'Raleway, sans-serif'}),
+        html.Div(id='tabs-content')
     ], style={'margin-top': '10px'})
 
 # CallBacks
@@ -566,18 +558,18 @@ def render_content(tab):
                 # MAPA
                 html.Div([
                             
-                html.Div(
-                    dcc.Graph(id = 'choropleth-map-duration')
-                )
+                    html.Div(
+                        dcc.Graph(id = 'choropleth-map-duration')
+                    )
                 
                 ], style={
                 }),
         
         ], style={
-                                'background-color': '#fff',
-                                'border-radius': '15px',
-                                'box-shadow': '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)',
-                                'padding': '10px',
+            'background-color': '#fff',
+            'border-radius': '15px',
+            'box-shadow': '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)',
+            'padding': '10px',
         }),
 
                 html.Div([
@@ -587,6 +579,7 @@ def render_content(tab):
                                 'background-color': '#fff',
                                 'border-radius': '15px',
                                 'box-shadow': '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)',
+                                'padding': '10px'
                             }),
 
                             html.Div([  
@@ -628,15 +621,16 @@ def render_content(tab):
                             ], style={
                                     'background-color': '#fff',
                                     'border-radius': '15px',
-                                    'box-shadow': '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)'
+                                    'box-shadow': '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)',
+                                    'padding': '10px'
+                                    
                                 }
                             ),
         
                 ], style={
                     'display': 'grid',
-                    'grid-template-columns': '1fr',
                     'grid-template-rows': '1fr 1fr',
-                    'gap': '10px',
+                    'gap': '10px'
                 }),
 
         
@@ -724,6 +718,7 @@ def render_content(tab):
                                 'background-color': '#fff',
                                 'border-radius': '15px',
                                 'box-shadow': '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)',
+                                'padding': '10px'
                             }),
 
                             html.Div(
@@ -732,6 +727,7 @@ def render_content(tab):
                                     'background-color': '#fff',
                                     'border-radius': '15px',
                                     'box-shadow': '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)',
+                                    'padding': '10px'
                             })
         
             ], style={
@@ -1190,19 +1186,13 @@ def update_scatter_duration(value_state, value_region):
 
     df_scatter_fig['Região'] = df_scatter_fig['Estado'].map({unidecode(estado): regiao for regiao, estados in LOCALIZACAO.items() for estado in estados})
 
-    df_scatter_fig['Cor'] = df_scatter_fig['Região'].map(CORES_POR_REGIAO)
-
     fig = px.scatter(
         df_scatter_fig,
         x = 'Média de Tempo de Processo em Anos',
         y = 'Quantidade de Processos',
         hover_name = 'Estado',
-        symbol = 'Região',
-        color = 'Cor',
-        labels={'Cor': ''}
+        color = 'Região'
     )
-
-    fig.for_each_trace(lambda t: t.update(name=t.name.split(",")[-1]))
 
     if (value_state != None and value_state) or (value_region != None and value_region):
         
@@ -1226,12 +1216,8 @@ def update_scatter_duration(value_state, value_region):
                 x = 'Média de Tempo de Processo em Anos',
                 y = 'Quantidade de Processos',
                 hover_name = 'Estado',
-                symbol = 'Região',
-                color = 'Cor',
-                labels={'Cor': ''}
+                color = 'Região'
             )
-
-            fig.for_each_trace(lambda t: t.update(name=t.name.split(",")[-1]))
 
             return fig
 
@@ -1240,12 +1226,8 @@ def update_scatter_duration(value_state, value_region):
             x = 'Média de Tempo de Processo em Anos',
             y = 'Quantidade de Processos',
             hover_name = 'Estado',
-            symbol = 'Região',
-            color = 'Cor',
-            labels={'Cor': ''}
+            color = 'Região'
         )
-
-        fig.for_each_trace(lambda t: t.update(name=t.name.split(",")[-1]))
 
         return fig
     else:
@@ -1259,6 +1241,7 @@ def update_bar_duration(value_state, value_region):
     df_bar_filter = pd.DataFrame()
     
     df_bar = df_lbi_filter.copy()
+    df_bar = df_bar.loc[df_bar['sentenca'] != 'NÃO CLASSIFICADO']
 
     df_bar = df_bar['sentenca'].value_counts().to_frame()
     df_bar.index.names = ['Sentença']
@@ -1369,7 +1352,7 @@ def update_bar_demand(value_state, value_region):
     df_bar = df_bar.reset_index()
     df_bar = df_bar.sort_values(by='count').tail(10)
 
-    fig = px.bar(df_bar, x = 'count', y = 'Comarca', orientation='h', title = 'Comarcas com maior Número de Processos', labels={'count': 'Número de Processos'})
+    fig = px.bar(df_bar, x = 'count', y = 'Comarca', orientation='h', title = 'Comarcas com Maior Número de Processos', labels={'count': '', 'Comarca':''})
 
     if (value_state != None and value_state) or (value_region != None and value_region):
         
@@ -1394,11 +1377,11 @@ def update_bar_demand(value_state, value_region):
         df_bar_filter = df_bar_filter.sort_values(by='count').tail(10)
 
         if df_bar_filter.empty:
-            fig = px.bar(df_bar_filter, x = 'count', y = 'Comarca', orientation='h', title = 'Comarcas com maior Número de Processos', labels={'count': 'Número de Processos'})
+            fig = px.bar(df_bar_filter, x = 'count', y = 'Comarca', orientation='h', title = 'Comarcas com Maior Número de Processos', labels={'count': '', 'Comarca':''})
 
             return fig
 
-        fig = px.bar(df_bar_filter, x = 'count', y = 'Comarca', orientation='h', title = 'Comarcas com maior Número de Processos', labels={'count': 'Número de Processos'})
+        fig = px.bar(df_bar_filter, x = 'count', y = 'Comarca', orientation='h', title = 'Comarcas com Maior Número de Processos', labels={'count': '', 'Comarca':''})
 
         return fig
     else:
