@@ -1,16 +1,16 @@
-# Import packages
+# Importação das bibliotecas
 from dash import Dash, html, dcc, Output, Input
 import pandas as pd
 import numpy as np
-import json
-from urllib.request import urlopen
 import plotly.express as px
+from urllib.request import urlopen
+import json
 from unidecode import unidecode
 
 # Importação dos dados
-df_lbi = pd.read_csv('./admin_HD_LBI.csv')
-df_dados_mapa = pd.read_csv('./dados_mapa.csv')
-dados_censo = pd.read_csv('./dados_censo.csv')
+df_lbi = pd.read_csv('./assets/data/admin_HD_LBI.csv')
+df_dados_mapa = pd.read_csv('./assets/data/dados_mapa.csv')
+dados_censo = pd.read_csv('./assets/data/dados_censo.csv')
 
 # Correções
 uf_to_region = {
@@ -118,7 +118,8 @@ df_lbi_filter = df_lbi[df_lbi['numero'].str.split('.').str[1].isin([str(ano) for
 # Estilo da Aplicação
 app.layout = html.Div([
         html.Div(
-            dcc.Tabs(id="tabs-LBI", value='tab-visao_geral', children=[
+            dcc.Tabs(id="tabs-LBI", value='tab-inicial', children=[
+                dcc.Tab(label='Início', value='tab-inicial'),
                 dcc.Tab(label='Visão Geral', value='tab-visao_geral'),
                 dcc.Tab(label='Duração', value='tab-duracao'),
                 dcc.Tab(label='Demandas', value='tab-demandas')
@@ -134,7 +135,58 @@ app.layout = html.Div([
 Output('tabs-content', 'children'),
 Input('tabs-LBI', 'value'))
 def render_content(tab):
-    if tab == 'tab-visao_geral':
+    if tab == 'tab-inicial':
+        return html.Div([
+                        html.Div([
+                            html.Img(src = './assets/img/logo_usp.png', style={'height':'80px','width':'195px', 'padding':'15px'}),
+                            html.Img(src = './assets/img/logo_fearp.png', style={'height':'112px','width':'150px', 'padding':'15px'}),
+                            html.Img(src = './assets/img/logo_habeas_data.png', style={'height':'89px','width':'400px', 'padding':'15px'})
+                        ], style = {'display': 'flex',
+                                    'flex-direction':'row',
+                                    'height':'100%',
+                                    'width':'100%',
+                                    'justify-content':'space-around'}
+                        ),
+                        html.H4(children='DASHBOARD PARA VISUALIZAÇÃO DE DADOS PROCESSUAIS DA LEI BRASILEIRA DE INCLUSÃO',
+                        style={
+                            'textAlign': 'center',
+                            'color': '#252423',
+                            'margin-bottom': '10px',
+                            'font-weight':'bold',
+                            'font-size':'28px'}
+                        ),
+                        
+                        html.P(['Discente: Luiz Henrique Alves do Nascimento', html.Br(),'Orientador: Prof. Dr. Ildeberto A. Rodello'],
+                            style={
+                                'textAlign': 'right',
+                                'color': '#252423',
+                                'font-weight':'normal',
+                                'font-size': '22px',
+                                'margin-bottom':'10px',
+                                'padding':'5px'}
+                            ),
+
+                        html.Label(children = 'O presente dashboard é o resultado do projeto de pesquisa PUB entitulado de "Projeto e Implementação de Um Painel para Análise de Dados de uma Base de Dados de Decisões Judiciais" pela Faculdade de Economia, Administração e Contabilidade de Ribeirão Preto da Universidade de São Paulo que se apoia no projeto desenvolvido pelo graduado em administração Murilo Torres Andrade denominado de "Projeto e Implementação de Dashboards para Visualização de Dados Processuais". A base de dados processuais utilizada foi disponibilizada pelo grupo de pesquisa Habeas Data, da mesma faculdade. Ela contém os dados processuais ligados à Lei Brasileira de Inclusão (LBI), Lei n. 13.146/2015, mais precisamente o Título 4 que discorre a cerca da "Tutela", da "Curatela" e da "Tomada de Decisão Apoiada”, instrumentos que visam garantir à pessoa com deficiência maior autonomia. Os processos são referentes às palavras-chave: "Tutela","Curatela" e "Decisão Apoiada" com um recorte temporal dos 5 anos após a vigência da lei (2016-2021) e aos 5 anos anteriores (2011-2016).',
+                            style={
+                                'textAlign': 'justify',
+                                'color': '#252423',
+                                'font-weight':'normal',
+                                'font-size': '22px',
+                                'padding':'5px'}
+                            )                
+                ], style={
+                    'display': 'grid',
+                    'grid-template-columns': '1fr',
+                    'grid-template-rows': '1fr 1fr 1fr',
+                    'gap': '5px',
+                    'background-color': '#fff',
+                    'border-radius': '15px',
+                    'box-shadow': '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)',
+                    'padding': '10px',
+                    'margin-top':'10px',
+                    'margin-bottom':'10px'
+                }),
+    elif tab == 'tab-visao_geral':
         return html.Div([
 
             html.Div([
@@ -1387,10 +1439,6 @@ def update_bar_demand(value_state, value_region):
     else:
         return fig
 
-application = app.server
-
-# Aplicação
-#if __name__ == '__main__':
-#    app.run(debug = True, port="8050")
 if __name__=='__main__':
-    application.run(host='0.0.0.0', port='8080')
+    #application = app.run_server(port='8050')
+    application = app.run_server(port='8050', debug = True)
