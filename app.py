@@ -1456,6 +1456,8 @@ def update_bar_demand(value_state, value_region):
     else:
         return fig
 
+application = app.server
+
 if __name__=='__main__':
-    #application = app.run_server(port='8050')
-    application = app.run_server(port='8050', debug = True)
+    application.run(port='8050')
+    #application = app.run_server(port='8050', debug = True)
