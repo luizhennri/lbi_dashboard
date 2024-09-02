@@ -1,28 +1,3 @@
-Estado,Região,Latitude,Longitude
-Acre,Norte,-9.97499,-67.8243
-Alagoas,Nordeste,-9.6658,-35.735
-Amapá,Norte,0.0349,-51.0694
-Amazonas,Norte,-3.11866,-60.0212
-Bahia,Nordeste,-12.9714,-38.5014
-Ceará,Nordeste,-3.71722,-38.5434
-Distrito Federal,Centro-Oeste,-15.7801,-47.9292
-Espírito Santo,Sudeste,-20.3155,-40.3128
-Goiás,Centro-Oeste,-16.6864,-49.2643
-Maranhão,Nordeste,-2.53874,-44.2825
-Mato Grosso,Centro-Oeste,-15.601,-56.0974
-Mato Grosso do Sul,Centro-Oeste,-20.4697,-54.6201
-Minas Gerais,Sudeste,-19.9167,-43.9345
-Pará,Norte,-1.45502,-48.5024
-Paraíba,Nordeste,-7.1195,-34.845
-Paraná,Sul,-25.4284,-49.2733
-Pernambuco,Nordeste,-8.04756,-34.877
-Piauí,Nordeste,-5.09194,-42.8034
-Rio de Janeiro,Sudeste,-22.9068,-43.1729
-Rio Grande do Norte,Nordeste,-5.79448,-35.211
-Rio Grande do Sul,Sul,-30.0346,-51.2177
-Rondônia,Norte,-8.76077,-63.8999
-Roraima,Norte,2.8235,-60.6753
-Santa Catarina,Sul,-27.5954,-48.548
-São Paulo,Sudeste,-23.5505,-46.6333
-Sergipe,Nordeste,-10.9472,-37.0731
-Tocantins,Norte,-10.2491,-48.3243
+version https://git-lfs.github.com/spec/v1
+oid sha256:a490cb6ac7bf9babb5d77322b96df2b74a4acfa51c73ebc323d85031278968f0
+size 1047

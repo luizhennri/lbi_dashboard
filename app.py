@@ -6,8 +6,11 @@ import plotly.express as px
 from urllib.request import urlopen
 import json
 from unidecode import unidecode
+from flask_caching import Cache
+import os
 
 # Importação dos dados
+#df_lbi = pd.read_csv('./assets/data/admin_HD_LBI.csv', dtype={"_id": "float64", "numero": "string", "UF":"string", "status":"string", "data_sentenca":"string", "valor_acao":"string", "sentenca":"string", "comarca":"string", "camara":"string", "forum":"string", "instancia":"string", "natureza_vara":"string", "vara":"string", "materia_principal":"string", "natureza_processo":""})
 df_lbi = pd.read_csv('./assets/data/admin_HD_LBI.csv')
 df_dados_mapa = pd.read_csv('./assets/data/dados_mapa.csv')
 dados_censo = pd.read_csv('./assets/data/dados_censo.csv')
@@ -112,6 +115,16 @@ app = Dash(__name__, external_stylesheets = external_stylesheets, assets_externa
 
 app.css.config.serve_locally = True
 
+# Cache
+cache = Cache(app.server, config={
+    'CACHE_TYPE': 'filesystem',
+    'CACHE_DIR': 'C:/projects/lbi_dashboard/temp'
+})
+
+app.config.suppress_callback_exceptions = True
+
+TIMEOUT = 900
+
 # Filtros - Escopo Temporal
 df_lbi_filter = df_lbi[df_lbi['numero'].str.split('.').str[1].isin([str(ano) for ano in range(2011, 2022)])]
 
@@ -134,6 +147,7 @@ app.layout = html.Div([
 @app.callback(
 Output('tabs-content', 'children'),
 Input('tabs-LBI', 'value'))
+@cache.memoize(timeout=TIMEOUT)
 def render_content(tab):
     if tab == 'tab-inicial':
         return html.Div([
@@ -1063,6 +1077,7 @@ def update_map(value_state, value_region):
     Output('total_procedimento', 'children'),
     Output('total_tipo_processo', 'children'),
     [Input('filter-state', 'value'), Input('filter-region', 'value')])
+@cache.memoize(timeout=TIMEOUT)
 def update_cards_visao(value_state, value_region):
 
     total_cases = 0
@@ -1127,6 +1142,7 @@ def update_cards_visao(value_state, value_region):
     Output('avg_process', 'children'),
     Output('avg_process_sentenced', 'children'),
     [Input('filter-state', 'value'), Input('filter-region', 'value')])
+@cache.memoize(timeout=TIMEOUT)
 def update_cards_duration(value_state, value_region):
 
     avg_process = 0
@@ -1175,6 +1191,7 @@ def update_cards_duration(value_state, value_region):
 @app.callback(
     Output('process_mil', 'children'),
     [Input('filter-state', 'value'), Input('filter-region', 'value')])
+@cache.memoize(timeout=TIMEOUT)
 def update_cards_demand(value_state, value_region):
 
     total_habitantes = 0
