@@ -1,60 +1,22 @@
-# Importação das bibliotecas
-from dash import Dash, html, dcc, Output, Input
-import pandas as pd
-import numpy as np
-import plotly.express as px
-from urllib.request import urlopen
-import json
-from unidecode import unidecode
-from flask_caching import Cache
-from dotenv import dotenv_values
-import pwd
 import os
 import platform
-
-config = dotenv_values(".env")
-
-ENV = config.get("ENVIRONMENT")
+import numpy as np
+import pandas as pd
+import plotly.express as px
+from flask_caching import Cache
+from unidecode import unidecode
+from dash import Dash, html, dcc, Output, Input
+from lbi_dashboard_autism.const import CONFIG, ESTADOS, LOCALIZACAO, UF_TO_REGION, BRAZIL_GEOJSON, TIMEOUT, USERNAME
 
 # Importação dos dados
-#df_lbi = pd.read_csv('./assets/data/admin_HD_LBI.csv', dtype={"_id": "float64", "numero": "string", "UF":"string", "status":"string", "data_sentenca":"string", "valor_acao":"string", "sentenca":"string", "comarca":"string", "camara":"string", "forum":"string", "instancia":"string", "natureza_vara":"string", "vara":"string", "materia_principal":"string", "natureza_processo":""})
 df_lbi = pd.read_csv('./assets/data/admin_HD_LBI.csv')
 df_dados_mapa = pd.read_csv('./assets/data/dados_mapa.csv')
 dados_censo = pd.read_csv('./assets/data/dados_censo.csv')
 
+ENV = CONFIG.get("ENVIRONMENT")
+
 # Correções
-uf_to_region = {
-    'AC': 'Norte',
-    'AL': 'Nordeste',
-    'AP': 'Norte',
-    'AM': 'Norte',
-    'BA': 'Nordeste',
-    'CE': 'Nordeste',
-    'DF': 'Centro-Oeste',
-    'ES': 'Sudeste',
-    'GO': 'Centro-Oeste',
-    'MA': 'Nordeste',
-    'MT': 'Centro-Oeste',
-    'MS': 'Centro-Oeste',
-    'MG': 'Sudeste',
-    'PA': 'Norte',
-    'PB': 'Nordeste',
-    'PR': 'Sul',
-    'PE': 'Nordeste',
-    'PI': 'Nordeste',
-    'RJ': 'Sudeste',
-    'RN': 'Nordeste',
-    'RS': 'Sul',
-    'RO': 'Norte',
-    'RR': 'Norte',
-    'SC': 'Sul',
-    'SP': 'Sudeste',
-    'SE': 'Nordeste',
-    'TO': 'Norte'
-}
-
-df_lbi['regiao'] = df_lbi.apply(lambda row: uf_to_region.get(row['UF'], row['regiao']), axis=1)
-
+df_lbi['regiao'] = df_lbi.apply(lambda row: UF_TO_REGION.get(row['UF'], row['regiao']), axis=1)
 df_lbi['Tempo de Processo em Anos'] = df_lbi['Tempo de Processo em Anos'].str.replace(',', '.').astype(float).apply(lambda x: np.nan if x < 0 else x)
 
 dados_censo = dados_censo.drop(columns=['PROCESSOS POR 100MIL HABITANTES', 'Quantidade de Processos por Estado'])
@@ -63,54 +25,6 @@ dados_censo['REGIAO'] = dados_censo['REGIAO'].str.replace('Região ', '')
 
 # DataSets Auxiliaress
 recorte_temporal = ['2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021']
-
-LOCALIZACAO = {
-    "Norte": ["Acre", "Amapá", "Amazonas", "Pará", "Rondônia", "Roraima", "Tocantins"],
-    "Nordeste": ["Alagoas", "Bahia", "Ceará", "Maranhão", "Paraíba", "Pernambuco", "Piauí", "Rio Grande do Norte", "Sergipe"],
-    "Centro-Oeste": ["Distrito Federal", "Goiás", "Mato Grosso", "Mato Grosso do Sul"],
-    "Sudeste": ["Espírito Santo", "Minas Gerais", "Rio de Janeiro", "São Paulo"],
-    "Sul": ["Paraná", "Rio Grande do Sul", "Santa Catarina"]
-}
-
-ESTADOS = [
-    "Acre",
-    "Alagoas",
-    "Amapa",
-    "Amazonas",
-    "Bahia",
-    "Ceará",
-    "Distrito Federal",
-    "Espirito Santo",
-    "Goias",
-    "Maranhão",
-    "Mato Grosso",
-    "Mato Grosso do Sul",
-    "Minas Gerais",
-    "Para",
-    "Paraíba",
-    "Parana",
-    "Pernambuco",
-    "Piaui",
-    "Rio de Janeiro",
-    "Rio Grande do Norte",
-    "Rio Grande do Sul",
-    "Rondonia",
-    "Roraima",
-    "Santa Catarina",
-    "São Paulo",
-    "Sergipe",
-    "Tocantins"
-]
-
-with urlopen("https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/brazil-states.geojson") as response: Brazil = json.load(response)
-
-state_id_map = {}      
-
-for feature in Brazil['features']: 
-    feature['id'] = unidecode(feature['properties']['name'])
-    state_id_map[feature['properties']['sigla']] = feature['id']
-
-BRAZIL_GEOJSON = Brazil.copy()
 
 # Configuração de Estilo
 external_stylesheets = [
@@ -122,7 +36,6 @@ app = Dash(__name__, external_stylesheets = external_stylesheets, assets_externa
 
 app.css.config.serve_locally = True
 
-USERNAME = pwd.getpwuid(os.getuid())[0]
 
 def _get_os() -> str:
     return platform.system()
@@ -157,7 +70,6 @@ cache = Cache(app.server, config={
 
 app.config.suppress_callback_exceptions = True
 
-TIMEOUT = 900
 
 # Filtros - Escopo Temporal
 df_lbi_filter = df_lbi[df_lbi['numero'].str.split('.').str[1].isin([str(ano) for ano in range(2011, 2022)])]
