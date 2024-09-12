@@ -7,7 +7,14 @@ from urllib.request import urlopen
 import json
 from unidecode import unidecode
 from flask_caching import Cache
+from dotenv import dotenv_values
+import pwd
 import os
+import platform
+
+config = dotenv_values(".env")
+
+ENV = config.get("ENVIRONMENT")
 
 # Importação dos dados
 #df_lbi = pd.read_csv('./assets/data/admin_HD_LBI.csv', dtype={"_id": "float64", "numero": "string", "UF":"string", "status":"string", "data_sentenca":"string", "valor_acao":"string", "sentenca":"string", "comarca":"string", "camara":"string", "forum":"string", "instancia":"string", "natureza_vara":"string", "vara":"string", "materia_principal":"string", "natureza_processo":""})
@@ -115,10 +122,37 @@ app = Dash(__name__, external_stylesheets = external_stylesheets, assets_externa
 
 app.css.config.serve_locally = True
 
-# Cache
+USERNAME = pwd.getpwuid(os.getuid())[0]
+
+def _get_os() -> str:
+    return platform.system()
+
+def _return_dict_from_os(platform: str) -> dict:
+    CACHE_DIR_DICT_LINUX = {
+        "dev": "/tmp",
+        "prod": f"/home/{USERNAME}"
+    }
+
+    CACHE_DIR_DICT_WIN = {
+        "dev": os.getcwd(),
+        "prod": f'C:/Users/{USERNAME}/AppData/Local/Temp'
+    }
+
+    CACHE_DIR_BY_OS = {
+        "Linux": CACHE_DIR_DICT_LINUX,
+        "Windows": CACHE_DIR_DICT_WIN
+    }
+
+    return CACHE_DIR_BY_OS.get(platform, CACHE_DIR_DICT_LINUX)
+
+def get_cache_dir():
+    _os = _get_os()
+    _cache_dict = _return_dict_from_os(_os)
+    return _cache_dict.get(ENV)
+
 cache = Cache(app.server, config={
     'CACHE_TYPE': 'filesystem',
-    'CACHE_DIR': 'C:/projects/lbi_dashboard/temp'
+    'CACHE_DIR': get_cache_dir()
 })
 
 app.config.suppress_callback_exceptions = True
