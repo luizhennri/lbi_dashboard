@@ -1,132 +1,33 @@
-# Importação das bibliotecas
+# Importação das Bibliotecas
 from dash import Dash, html, dcc, Output, Input
-import pandas as pd
-import numpy as np
 import plotly.express as px
-from urllib.request import urlopen
-import json
-from unidecode import unidecode
 from flask_caching import Cache
-import os
+from const import *
+from data import *
 
-# Importação dos dados
-#df_lbi = pd.read_csv('./assets/data/admin_HD_LBI.csv', dtype={"_id": "float64", "numero": "string", "UF":"string", "status":"string", "data_sentenca":"string", "valor_acao":"string", "sentenca":"string", "comarca":"string", "camara":"string", "forum":"string", "instancia":"string", "natureza_vara":"string", "vara":"string", "materia_principal":"string", "natureza_processo":""})
-df_lbi = pd.read_csv('./assets/data/admin_HD_LBI.csv')
-df_dados_mapa = pd.read_csv('./assets/data/dados_mapa.csv')
-dados_censo = pd.read_csv('./assets/data/dados_censo.csv')
+# Importação dos Dados
+df_lbi = DF_DATA
+df_dados_mapa = DF_MAPA
+dados_censo = DF_CENSO
 
-# Correções
-uf_to_region = {
-    'AC': 'Norte',
-    'AL': 'Nordeste',
-    'AP': 'Norte',
-    'AM': 'Norte',
-    'BA': 'Nordeste',
-    'CE': 'Nordeste',
-    'DF': 'Centro-Oeste',
-    'ES': 'Sudeste',
-    'GO': 'Centro-Oeste',
-    'MA': 'Nordeste',
-    'MT': 'Centro-Oeste',
-    'MS': 'Centro-Oeste',
-    'MG': 'Sudeste',
-    'PA': 'Norte',
-    'PB': 'Nordeste',
-    'PR': 'Sul',
-    'PE': 'Nordeste',
-    'PI': 'Nordeste',
-    'RJ': 'Sudeste',
-    'RN': 'Nordeste',
-    'RS': 'Sul',
-    'RO': 'Norte',
-    'RR': 'Norte',
-    'SC': 'Sul',
-    'SP': 'Sudeste',
-    'SE': 'Nordeste',
-    'TO': 'Norte'
-}
-
-df_lbi['regiao'] = df_lbi.apply(lambda row: uf_to_region.get(row['UF'], row['regiao']), axis=1)
-
-df_lbi['Tempo de Processo em Anos'] = df_lbi['Tempo de Processo em Anos'].str.replace(',', '.').astype(float).apply(lambda x: np.nan if x < 0 else x)
-
-dados_censo = dados_censo.drop(columns=['PROCESSOS POR 100MIL HABITANTES', 'Quantidade de Processos por Estado'])
-dados_censo['POPULAÇÃO / 100K'] = dados_censo['POPULAÇÃO / 100K'].str.replace(',', '.').astype(float)
-dados_censo['REGIAO'] = dados_censo['REGIAO'].str.replace('Região ', '')
-
-# DataSets Auxiliaress
-recorte_temporal = ['2011', '2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021']
-
-LOCALIZACAO = {
-    "Norte": ["Acre", "Amapá", "Amazonas", "Pará", "Rondônia", "Roraima", "Tocantins"],
-    "Nordeste": ["Alagoas", "Bahia", "Ceará", "Maranhão", "Paraíba", "Pernambuco", "Piauí", "Rio Grande do Norte", "Sergipe"],
-    "Centro-Oeste": ["Distrito Federal", "Goiás", "Mato Grosso", "Mato Grosso do Sul"],
-    "Sudeste": ["Espírito Santo", "Minas Gerais", "Rio de Janeiro", "São Paulo"],
-    "Sul": ["Paraná", "Rio Grande do Sul", "Santa Catarina"]
-}
-
-ESTADOS = [
-    "Acre",
-    "Alagoas",
-    "Amapa",
-    "Amazonas",
-    "Bahia",
-    "Ceará",
-    "Distrito Federal",
-    "Espirito Santo",
-    "Goias",
-    "Maranhão",
-    "Mato Grosso",
-    "Mato Grosso do Sul",
-    "Minas Gerais",
-    "Para",
-    "Paraíba",
-    "Parana",
-    "Pernambuco",
-    "Piaui",
-    "Rio de Janeiro",
-    "Rio Grande do Norte",
-    "Rio Grande do Sul",
-    "Rondonia",
-    "Roraima",
-    "Santa Catarina",
-    "São Paulo",
-    "Sergipe",
-    "Tocantins"
-]
-
-with urlopen("https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/brazil-states.geojson") as response: Brazil = json.load(response)
-
-state_id_map = {}      
-
-for feature in Brazil['features']: 
-    feature['id'] = unidecode(feature['properties']['name'])
-    state_id_map[feature['properties']['sigla']] = feature['id']
-
-BRAZIL_GEOJSON = Brazil.copy()
-
-# Configuração de Estilo
-external_stylesheets = [
-    'https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap',
-]
 
 # Inicialização do Aplicativo
-app = Dash(__name__, external_stylesheets = external_stylesheets, assets_external_path = './assets', title = 'LBI Dashboard', update_title='Atualizando ...', suppress_callback_exceptions=True)
+app = Dash(__name__, external_stylesheets = EXTERNAL_STYLESHEETS, assets_external_path = './assets', title = 'LBI Dashboard', update_title='Atualizando ...', suppress_callback_exceptions=True)
 
 app.css.config.serve_locally = True
 
 # Cache
 cache = Cache(app.server, config={
     'CACHE_TYPE': 'filesystem',
-    'CACHE_DIR': 'C:/projects/lbi_dashboard/temp'
+    'CACHE_DIR': './temp'
 })
 
 app.config.suppress_callback_exceptions = True
 
-TIMEOUT = 900
 
 # Filtros - Escopo Temporal
-df_lbi_filter = df_lbi[df_lbi['numero'].str.split('.').str[1].isin([str(ano) for ano in range(2011, 2022)])]
+df_lbi_filter = df_lbi[df_lbi['numero'].str.split('.').str[1].isin([str(ano) for ano in RECORTE_TEMPORAL])]
+
 
 # Estilo da Aplicação
 app.layout = html.Div([
@@ -141,7 +42,8 @@ app.layout = html.Div([
         html.Div(id='tabs-content')
     ], style={'margin-top': '10px'})
 
-# CallBacks
+
+# ------------------- CallBacks -------------------
 
 # ==== Abas ====
 @app.callback(
@@ -152,16 +54,19 @@ def render_content(tab):
     if tab == 'tab-inicial':
         return html.Div([
                         html.Div([
-                            html.Img(src = './assets/img/logo_usp.png', style={'height':'80px','width':'195px', 'padding':'15px'}),
-                            html.Img(src = './assets/img/logo_fearp.png', style={'height':'112px','width':'150px', 'padding':'15px'}),
-                            html.Img(src = './assets/img/logo_habeas_data.png', style={'height':'89px','width':'400px', 'padding':'15px'})
-                        ], style = {'display': 'flex',
-                                    'flex-direction':'row',
-                                    'height':'100%',
-                                    'width':'100%',
-                                    'justify-content':'space-around'}
-                        ),
-                        html.H4(children='DASHBOARD PARA VISUALIZAÇÃO DE DADOS PROCESSUAIS DA LEI BRASILEIRA DE INCLUSÃO',
+                            html.Img(src='./assets/img/logo_usp.png', style={'height': 'auto', 'max-width': '20%', 'padding': '15px'}),
+                            html.Img(src='./assets/img/logo_fearp.png', style={'height': 'auto', 'max-width': '20%', 'padding': '15px'}),
+                            html.Img(src='./assets/img/logo_habeas_data.png', style={'height': 'auto', 'max-width': '40%', 'padding': '15px'})
+                        ], style={
+                            'display': 'flex',
+                            'flex-direction': 'row',
+                            'flex-wrap': 'wrap',
+                            'height': '100%',
+                            'width': '100%',
+                            'justify-content': 'space-around',
+                            'align-items': 'center',
+                        }),
+                        html.H4(children='PAINEL PARA VISUALIZAÇÃO DE DADOS PROCESSUAIS DA LEI BRASILEIRA DE INCLUSÃO',
                         style={
                             'textAlign': 'center',
                             'color': '#252423',
@@ -180,7 +85,7 @@ def render_content(tab):
                                 'padding':'5px'}
                             ),
 
-                        html.Label(children = 'O presente dashboard é o resultado do projeto de pesquisa PUB entitulado de "Projeto e Implementação de Um Painel para Análise de Dados de uma Base de Dados de Decisões Judiciais" pela Faculdade de Economia, Administração e Contabilidade de Ribeirão Preto da Universidade de São Paulo que se apoia no projeto desenvolvido pelo graduado em administração Murilo Torres Andrade denominado de "Projeto e Implementação de Dashboards para Visualização de Dados Processuais". A base de dados processuais utilizada foi disponibilizada pelo grupo de pesquisa Habeas Data, da mesma faculdade. Ela contém os dados processuais ligados à Lei Brasileira de Inclusão (LBI), Lei n. 13.146/2015, mais precisamente o Título 4 que discorre a cerca da "Tutela", da "Curatela" e da "Tomada de Decisão Apoiada”, instrumentos que visam garantir à pessoa com deficiência maior autonomia. Os processos são referentes às palavras-chave: "Tutela","Curatela" e "Decisão Apoiada" com um recorte temporal dos 5 anos após a vigência da lei (2016-2021) e aos 5 anos anteriores (2011-2016).',
+                        html.Label(children = 'Este painel é resultado do projeto "Projeto e Implementação de Um Painel para Análise de Dados de uma Base de Decisões Judiciais", financiado pelo Programa Unificado de Bolsas (PUB) da Universidade de São Paulo. O trabalho foi desenvolvido na Faculdade de Economia, Administração e Contabilidade de Ribeirão Preto (FEA-RP), no grupo de pesquisas Habeas Data. O dataset utilizado abrange dados processuais relacionados à Lei Brasileira de Inclusão (LBI), Lei n. 13.146/2015, especificamente sobre "Tutela", "Curatela" e "Tomada de Decisão Apoiada". O recorte temporal inclui os cinco anos anteriores (2011-2016) e os cinco anos posteriores à vigência da lei (2016-2021).',
                             style={
                                 'textAlign': 'justify',
                                 'color': '#252423',
@@ -191,14 +96,14 @@ def render_content(tab):
                 ], style={
                     'display': 'grid',
                     'grid-template-columns': '1fr',
-                    'grid-template-rows': '1fr 1fr 1fr',
-                    'gap': '5px',
+                    'grid-template-rows': '1fr 1fr 1fr 1fr',
+                    'gap': '10px',
                     'background-color': '#fff',
                     'border-radius': '15px',
                     'box-shadow': '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)',
-                    'padding': '10px',
                     'margin-top':'10px',
-                    'margin-bottom':'10px'
+                    'margin-bottom':'10px',
+                    'font-family': 'Open Sans, sans-serif'
                 }),
     elif tab == 'tab-visao_geral':
         return html.Div([
@@ -264,10 +169,10 @@ def render_content(tab):
                 }),
         
         ], style={
-                                'background-color': '#fff',
-                                'border-radius': '15px',
-                                'box-shadow': '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)',
-                                'padding': '10px',
+            'background-color': '#fff',
+            'border-radius': '15px',
+            'box-shadow': '0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)',
+            'padding': '10px',
         }),
 
                 html.Div([
@@ -1066,7 +971,6 @@ def update_map(value_state, value_region):
         return fig
 
 # ==== Cards ====
-
 # Visão Geral
 @app.callback(
     Output('total_cases', 'children'),
@@ -1233,7 +1137,6 @@ def update_cards_demand(value_state, value_region):
         return f"{df_lbi_filter['_id'].nunique()/dados_censo['POPULAÇÃO / 100K'].sum():.2f}".format().replace('.',',')
     
 # ==== Gráficos =====
-
 @app.callback(
     Output('scatter-duration', 'figure'),
     [Input('filter-state', 'value'), Input('filter-region', 'value')])
@@ -1456,8 +1359,9 @@ def update_bar_demand(value_state, value_region):
     else:
         return fig
 
-application = app.server
 
+# Função principal
 if __name__=='__main__':
+    application = app.server
     application.run(port='8050')
     #application = app.run_server(port='8050', debug = True)
