@@ -1000,24 +1000,24 @@ def update_cards_visao(value_state, value_region):
                 df_lbi_2 = df_lbi_filter.loc[(df_lbi_filter['regiao'] == regiao)]
 
                 total_cases += df_lbi_2['_id'].nunique()
-                total_direito += df_lbi_2['area_direito'].value_counts()[0]
-                total_materia += df_lbi_2['materia_principal'].value_counts()[0]
-                total_natureza_processo += df_lbi_2['natureza_processo'].value_counts()[0]
-                total_natureza_vara += df_lbi_2['natureza_vara'].value_counts()[0]
-                total_procedimento += df_lbi_2['procedimento'].value_counts()[0]
-                total_tipo += df_lbi_2['tipo_processo'].value_counts()[0]
+                total_direito += df_lbi_2['area_direito'].value_counts().iloc[0]
+                total_materia += df_lbi_2['materia_principal'].value_counts().iloc[0]
+                total_natureza_processo += df_lbi_2['natureza_processo'].value_counts().iloc[0]
+                total_natureza_vara += df_lbi_2['natureza_vara'].value_counts().iloc[0]
+                total_procedimento += df_lbi_2['procedimento'].value_counts().iloc[0]
+                total_tipo += df_lbi_2['tipo_processo'].value_counts().iloc[0]
 
         elif (value_state != None and value_state) and (value_region == None or not value_region):
             for estado in value_state:
                 df_lbi_2 = df_lbi_filter.loc[(df_lbi_filter['ESTADOS'] == unidecode(estado))]
 
                 total_cases += df_lbi_2['_id'].nunique()
-                total_direito += df_lbi_2['area_direito'].value_counts()[0]
-                total_materia += df_lbi_2['materia_principal'].value_counts()[0]
-                total_natureza_processo += df_lbi_2['natureza_processo'].value_counts()[0]
-                total_natureza_vara += df_lbi_2['natureza_vara'].value_counts()[0]
-                total_procedimento += df_lbi_2['procedimento'].value_counts()[0]
-                total_tipo += df_lbi_2['tipo_processo'].value_counts()[0]
+                total_direito += df_lbi_2['area_direito'].value_counts().iloc[0]
+                total_materia += df_lbi_2['materia_principal'].value_counts().iloc[0]
+                total_natureza_processo += df_lbi_2['natureza_processo'].value_counts().iloc[0]
+                total_natureza_vara += df_lbi_2['natureza_vara'].value_counts().iloc[0]
+                total_procedimento += df_lbi_2['procedimento'].value_counts().iloc[0]
+                total_tipo += df_lbi_2['tipo_processo'].value_counts().iloc[0]
         else:
             for regiao in value_region:
                 for estado in value_state:
@@ -1026,12 +1026,12 @@ def update_cards_visao(value_state, value_region):
                     total_cases += df_lbi_2['_id'].nunique()
 
                     if not df_lbi_2.empty:
-                        total_direito += df_lbi_2['area_direito'].value_counts()[0]
-                        total_materia += df_lbi_2['materia_principal'].value_counts()[0]
-                        total_natureza_processo += df_lbi_2['natureza_processo'].value_counts()[0]
-                        total_natureza_vara += df_lbi_2['natureza_vara'].value_counts()[0]
-                        total_procedimento += df_lbi_2['procedimento'].value_counts()[0]
-                        total_tipo += df_lbi_2['tipo_processo'].value_counts()[0]
+                        total_direito += df_lbi_2['area_direito'].value_counts().iloc[0]
+                        total_materia += df_lbi_2['materia_principal'].value_counts().iloc[0]
+                        total_natureza_processo += df_lbi_2['natureza_processo'].value_counts().iloc[0]
+                        total_natureza_vara += df_lbi_2['natureza_vara'].value_counts().iloc[0]
+                        total_procedimento += df_lbi_2['procedimento'].value_counts().iloc[0]
+                        total_tipo += df_lbi_2['tipo_processo'].value_counts().iloc[0]
         
         if total_cases == 0:
             return '0', ' 0 %', ' 0 %', ' 0 %', ' 0 %', ' 0 %', ' 0 %'
@@ -1039,7 +1039,7 @@ def update_cards_visao(value_state, value_region):
 
             return f"{(total_cases):,}".format().replace(',','.'), f'{(total_direito/total_cases)*100:.2f}'.format().replace('.',',') + ' %', f'{(total_materia/total_cases)*100:.2f}'.format().replace('.',',') + ' %', f'{(total_natureza_processo/total_cases)*100:.2f}'.format().replace('.',',') + ' %', f'{(total_natureza_vara/total_cases)*100:.2f}'.format().replace('.',',') + ' %', f'{(total_procedimento/total_cases)*100:.2f}'.format().replace('.',',') + ' %', f'{(total_tipo/total_cases)*100:.2f}'.format().replace('.',',') + ' %'
     else:
-        return f"{df_lbi_filter['_id'].nunique():,}".format().replace(',','.'), f"{(df_lbi_filter['area_direito'].value_counts()[0])/(df_lbi_filter['_id'].nunique())*100:.2f}".format().replace('.',',') + ' %', f"{(df_lbi_filter['materia_principal'].value_counts()[0])/(df_lbi_filter['_id'].nunique())*100:.2f}".format().replace('.',',') + ' %', f"{(df_lbi_filter['natureza_processo'].value_counts()[0])/(df_lbi_filter['_id'].nunique())*100:.2f}".format().replace('.',',') + ' %', f"{(df_lbi_filter['natureza_vara'].value_counts()[0])/(df_lbi_filter['_id'].nunique())*100:.2f}".format().replace('.',',') + ' %', f"{(df_lbi_filter['procedimento'].value_counts()[0])/(df_lbi_filter['_id'].nunique())*100:.2f}".format().replace('.',',') + ' %', f"{(df_lbi_filter['tipo_processo'].value_counts()[0])/(df_lbi_filter['_id'].nunique())*100:.2f}".format().replace('.',',') + ' %'
+        return f"{df_lbi_filter['_id'].nunique():,}".format().replace(',','.'), f"{(df_lbi_filter['area_direito'].value_counts().iloc[0])/(df_lbi_filter['_id'].nunique())*100:.2f}".format().replace('.',',') + ' %', f"{(df_lbi_filter['materia_principal'].value_counts().iloc[0])/(df_lbi_filter['_id'].nunique())*100:.2f}".format().replace('.',',') + ' %', f"{(df_lbi_filter['natureza_processo'].value_counts().iloc[0])/(df_lbi_filter['_id'].nunique())*100:.2f}".format().replace('.',',') + ' %', f"{(df_lbi_filter['natureza_vara'].value_counts().iloc[0])/(df_lbi_filter['_id'].nunique())*100:.2f}".format().replace('.',',') + ' %', f"{(df_lbi_filter['procedimento'].value_counts().iloc[0])/(df_lbi_filter['_id'].nunique())*100:.2f}".format().replace('.',',') + ' %', f"{(df_lbi_filter['tipo_processo'].value_counts().iloc[0])/(df_lbi_filter['_id'].nunique())*100:.2f}".format().replace('.',',') + ' %'
 
 # Duração
 @app.callback(
