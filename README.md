@@ -20,15 +20,15 @@ Painel de visualização desenvolvido para o Projeto de Iniciação Científica 
 - Estilo do dashboard
 
 ## Componentes:
-- Dash (v2.16.1)
-- Pandas (v2.2.2)
-- Plotly (v5.18.0)
+- Dash (v3.0.4)
+- Pandas (v2.3.0)
+- Plotly (v6.1.2)
 - Plotly Express (v0.4.1)
-- Unidecode (v1.3.6)
-- Urllib3 (v1.26.14)
-- Numpy (v1.26.4)
-- Flask Caching (v2.3.0)
-- Python Dotenv (v1.0.1)
+- Unidecode (v1.4.0)
+- Urllib3 (v2.4.0)
+- Numpy (v2.3.0)
+- Flask Caching (v2.3.1)
+- Python Dotenv (v1.1.0)
 
 
 ## Requisitos:
