@@ -160,7 +160,7 @@ cython_debug/
 #.idea/
 
 # Cache
-!temp/.gitkeep 
+/temp/
 
 # Git
 .gitattributes

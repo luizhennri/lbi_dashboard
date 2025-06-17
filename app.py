@@ -734,7 +734,7 @@ def update_map(value_state, value_region):
 
     df_dados_mapa_final = pd.merge(df_dados_mapa_merge, df_lbi_merge, how = 'inner', on = 'Estado')
 
-    fig = px.choropleth_mapbox(
+    fig = px.choropleth_map(
         df_dados_mapa_final,
         locations = 'Estado',
         geojson = BRAZIL_GEOJSON,
@@ -742,7 +742,7 @@ def update_map(value_state, value_region):
         hover_name = 'Estado',
         hover_data = ['count','Longitude','Latitude'],
         title = "Quantidade de Processos por Estado",
-        mapbox_style= 'white-bg',
+        map_style= 'white-bg',
         labels={'count': 'Processos'},
         center = {"lat":-14, "lon": -55},
         zoom = 2,
@@ -766,11 +766,11 @@ def update_map(value_state, value_region):
                     df_map = pd.concat([df_map, df_dados_mapa_final.loc[((df_dados_mapa_final['Estado'] == unidecode(estado)) & (df_dados_mapa_final['Região'] == regiao))]])    
 
         if df_map.empty:
-            fig = px.choropleth_mapbox(
+            fig = px.choropleth_map(
                 df_map,
                 geojson = BRAZIL_GEOJSON,
                 title = "Quantidade de Processos por Estado",
-                mapbox_style= 'white-bg',
+                map_style= 'white-bg',
                 center = {"lat":-14, "lon": -55},
                 zoom = 2,
                 color_continuous_scale= 'Teal',
@@ -779,7 +779,7 @@ def update_map(value_state, value_region):
 
             return fig
 
-        fig = px.choropleth_mapbox(
+        fig = px.choropleth_map(
             df_map,
             locations = 'Estado',
             geojson = BRAZIL_GEOJSON,
@@ -787,7 +787,7 @@ def update_map(value_state, value_region):
             hover_name = 'Estado',
             hover_data = ['count','Longitude','Latitude'],
             title = "Quantidade de Processos por Estado",
-            mapbox_style= 'white-bg',
+            map_style= 'white-bg',
             labels={'count': 'Processos'},
             center = {"lat":-14, "lon": -55},
             zoom = 2,
@@ -818,7 +818,7 @@ def update_map(value_state, value_region):
 
     df_dados_mapa_final = pd.merge(df_dados_mapa_merge, df_lbi_merge, how = 'inner', on = 'Estado')
 
-    fig = px.choropleth_mapbox(
+    fig = px.choropleth_map(
         df_dados_mapa_final,
         locations = 'Estado',
         geojson = BRAZIL_GEOJSON,
@@ -826,7 +826,7 @@ def update_map(value_state, value_region):
         hover_name = 'Estado',
         hover_data = ['Tempo de Processo em Anos','Longitude','Latitude'],
         title = "Média de Tempo dos Processos por Estado",
-        mapbox_style= 'white-bg',
+        map_style= 'white-bg',
         labels={'Tempo de Processo em Anos': 'Anos'},
         center = {"lat":-14, "lon": -55},
         zoom = 2,
@@ -850,11 +850,11 @@ def update_map(value_state, value_region):
                     df_map = pd.concat([df_map, df_dados_mapa_final.loc[((df_dados_mapa_final['Estado'] == unidecode(estado)) & (df_dados_mapa_final['Região'] == regiao))]])    
 
         if df_map.empty:
-            fig = px.choropleth_mapbox(
+            fig = px.choropleth_map(
                 df_map,
                 geojson = BRAZIL_GEOJSON,
                 title = "Média de Tempo dos Processos por Estado",
-                mapbox_style= 'white-bg',
+                map_style= 'white-bg',
                 center = {"lat":-14, "lon": -55},
                 zoom = 2,
                 color_continuous_scale= 'Teal',
@@ -863,7 +863,7 @@ def update_map(value_state, value_region):
 
             return fig
 
-        fig = px.choropleth_mapbox(
+        fig = px.choropleth_map(
             df_map,
             locations = 'Estado',
             geojson = BRAZIL_GEOJSON,
@@ -871,7 +871,7 @@ def update_map(value_state, value_region):
             hover_name = 'Estado',
             hover_data = ['Tempo de Processo em Anos','Longitude','Latitude'],
             title = "Média de Tempo dos Processos por Estado",
-            mapbox_style= 'white-bg',
+            map_style= 'white-bg',
             labels={'Tempo de Processo em Anos': 'Anos'},
             center = {"lat":-14, "lon": -55},
             zoom = 2,
@@ -906,7 +906,7 @@ def update_map(value_state, value_region):
 
     df_dados_mapa_final['PROCESSOS / 100K'] = df_dados_mapa_final['Processos'] / df_dados_mapa_final['POPULAÇÃO / 100K']
 
-    fig = px.choropleth_mapbox(
+    fig = px.choropleth_map(
         df_dados_mapa_final,
         locations = 'Estado',
         geojson = BRAZIL_GEOJSON,
@@ -914,7 +914,7 @@ def update_map(value_state, value_region):
         hover_name = 'Estado',
         hover_data = ['PROCESSOS / 100K','Longitude','Latitude'],
         title = "Quantidade de Processos a cada 100 mil habitantes por Estado",
-        mapbox_style= 'white-bg',
+        map_style= 'white-bg',
         labels={'PROCESSOS / 100K': 'Processos por 100 mil'},
         center = {"lat":-14, "lon": -55},
         zoom = 2,
@@ -938,11 +938,11 @@ def update_map(value_state, value_region):
                     df_map = pd.concat([df_map, df_dados_mapa_final.loc[((df_dados_mapa_final['Estado'] == unidecode(estado)) & (df_dados_mapa_final['Região'] == regiao))]])    
 
         if df_map.empty:
-            fig = px.choropleth_mapbox(
+            fig = px.choropleth_map(
                 df_map,
                 geojson = BRAZIL_GEOJSON,
                 title = "Quantidade de Processos a cada 100 mil habitantes por Estado",
-                mapbox_style= 'white-bg',
+                map_style= 'white-bg',
                 center = {"lat":-14, "lon": -55},
                 zoom = 2,
                 color_continuous_scale= 'Teal',
@@ -951,7 +951,7 @@ def update_map(value_state, value_region):
 
             return fig
 
-        fig = px.choropleth_mapbox(
+        fig = px.choropleth_map(
             df_map,
             locations = 'Estado',
             geojson = BRAZIL_GEOJSON,
@@ -959,7 +959,7 @@ def update_map(value_state, value_region):
             hover_name = 'Estado',
             hover_data = ['PROCESSOS / 100K','Longitude','Latitude'],
             title = "Quantidade de Processos a cada 100 mil habitantes por Estado",
-            mapbox_style= 'white-bg',
+            map_style= 'white-bg',
             labels={'PROCESSOS / 100K': 'Processos por 100 mil'},
             center = {"lat":-14, "lon": -55},
             zoom = 2,
